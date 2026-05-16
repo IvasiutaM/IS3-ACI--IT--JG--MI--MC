@@ -1,7 +1,7 @@
-# Modulo de Informes y Agenda - En desarrollo
+# Modulo de Informes y Agenda - Finalizado
 
 ---
 
-Estado actual: en desarrollo.
+Estado actual: Finalizado.
 
 ---
