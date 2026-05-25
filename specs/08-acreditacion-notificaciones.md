@@ -31,6 +31,10 @@ Implementar el sistema de acreditación mediante código QR y las notificaciones
 - CA-04: Si la acreditación es exitosa, se muestra el nombre del participante y se registra la asistencia.
 - CA-05: Si el QR es inválido o ya fue usado, se muestra mensaje de error.
 - CA-06: Se lleva un registro de todos los acreditados con fecha y hora.
+Nuevos CA enriquecidos (Controles OWASP): 
+- CA-07 (OWASP Authorization): el endpoint /events/:id/accredit debe validar estrictamente a nivel de servidor que el usuario que ejecuta la petición HTTP tiene el rol de organizer Y que efectivamente es dueño de ese event_id, impidiendo que un participante manipule la petición para acreditarse a sí mismo. 
+- CA-08 (OWASP Data Integrity): el string generado en el QR event:{event_id}:user:{user_id}:reg:{registration_id} debe ser tratado como "no confiable" por el backend. Al escanearlo, el servidor debe cruzar esos tres IDs contra la base de datos para confirmar que la relación es legítima y no fue forjada (falsificada) por un tercero.
+
 
 ### HU-03: Acreditar manualmente
 **Como** organizador del evento, **quiero** acreditar manualmente a un participante, **para** los casos donde el QR no funciona o no fue generado.
