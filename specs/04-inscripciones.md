@@ -203,3 +203,14 @@ Registration.hasOne(RegistrationCancellation, { foreignKey: 'registration_id', a
 - Intentar inscribirse a evento que no existe.
 - Intentar cancelar inscripción de otro usuario.
 - Intentar acceder a gestión de inscripciones sin ser organizer del evento.
+### Mejora 
+Integrante: Giménez, Joaquin Elian
+Módulo: Spec 04 - Inscripciones 
+Riesgo OWASP a mitigar: A01:2021 - Broken Access Control (Control de Acceso Roto - Específicamente BOLA/IDOR: Insecure Direct Object References).
+Historia de usuario modificada:
+HU-01: Inscripción autónoma a evento 
+Como participante registrado, quiero inscribirme a un evento desde su página de detalle, para asistir al evento.
+Criterios de aceptación originales: CA-01 al CA-06 (Validación de cupos, lista de espera, etc.).
+Nuevos CA enriquecidos (Controles OWASP): 
+CA-07 (OWASP Access Control): la identidad del usuario que se inscribe debe extraerse exclusivamente del token/sesión del servidor (req.session.userId) y nunca de un parámetro enviado en el cuerpo de la petición (ej. oculto en un formulario HTML) para evitar que un usuario inscriba a otro manipulando el ID (IDOR). 
+CA-08 (OWASP Business Logic): la validación de que un usuario "NO puede inscribirse más de una vez" debe ejecutarse dentro de la transacción de base de datos de Sequelize con un bloqueo concurrente, impidiendo vulnerabilidades de condiciones de carrera (Race Conditions).
