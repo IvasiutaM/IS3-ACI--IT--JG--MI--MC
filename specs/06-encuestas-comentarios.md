@@ -59,6 +59,10 @@ Implementar el sistema de encuestas de satisfacción post-evento y comentarios p
 - CA-04: El comentario se publica inmediatamente y es visible para todos.
 - CA-05: Se muestra el nombre del autor y la fecha del comentario.
 
+**Nuevos Criterios de Aceptación enriquecidos (Controles OWASP)**
+- CA-06(OWASP Input Validation):el contenido del comentario debe ser validado estrictamente en el backend utilizando una lista blanca, rechazando caracteres especiales no requeridos para texto plano.
+- CA-07 (OWASP Output Encoding / Sanitization): antes de persistir en la base de datos y antes de ser renderizado en las vistas .**ejs**, el texto debe ser procesado obligatoriamente por la librería sanitize-html para eliminar cualquier etiqueta <script>, <iframe> o atributos de eventos JavaScript, previniendo ataques Stored XSS.
+
 ### HU-05: Ver comentarios de un evento
 **Como** visitante, **quiero** ver los comentarios de un evento, **para** conocer las opiniones de otros usuarios.
 
