@@ -40,6 +40,8 @@ Implementar el sistema de autenticación y gestión de cuentas de usuario. Este 
 - CA-03: Si el email no está verificado, se muestra mensaje indicando que debe verificar su email, con opción de reenviar enlace.
 - CA-04: Si las credenciales son incorrectas, se muestra mensaje genérico "Email o contraseña incorrectos".
 - CA-05: Tras 5 intentos fallidos consecutivos, se bloquea la cuenta por 15 minutos.
+- CA-06 (OWASP Rate Limiting): El bloqueo tras 5 intentos fallidos debe implementarse a nivel de IP y a nivel de usuario (email) de forma independiente para mitigar ataques de fuerza bruta distribuida y Credential Stuffing.
+- CA-07 (OWASP Session Management): Al autenticarse exitosamente, el sistema debe regenerar el ID de sesión (Session Fixation protection) antes de redirigir al dashboard.
 
 ### HU-04: Cierre de sesión
 **Como** usuario autenticado, **quiero** cerrar mi sesión, **para** proteger mi cuenta.
