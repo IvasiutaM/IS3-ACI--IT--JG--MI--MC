@@ -1,0 +1,105 @@
+# ============================================================
+# docker-compose.yml
+# Proyecto: Sistema de Gestión de Eventos Académicos
+# Stack:    Laravel 11 · PostgreSQL 16 · Nginx · Redis
+# ============================================================
+
+services:
+
+  # ── 1. Aplicación Laravel (PHP-FPM) ─────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
+    container_name: eventos_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html                   # código fuente montado en el contenedor
+      - vendor_data:/var/www/html/vendor  # vendor separado para mejor rendimiento
+    environment:
+      APP_NAME: "Eventos Académicos"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-eventos_db}
+      DB_USERNAME: ${DB_USERNAME:-eventos_user}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    networks:
+      - eventos_net
+
+  # ── 2. Servidor web Nginx ────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: eventos_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"            # acceder en http://localhost:8080
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - eventos_net
+
+  # ── 3. Base de datos PostgreSQL ──────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: eventos_db
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT_EXPOSED:-5433}:5432"   # 5433 para no chocar con Postgres local
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-eventos_db}
+      POSTGRES_USER: ${DB_USERNAME:-eventos_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - db_data:/var/lib/postgresql/data  # datos persistentes
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-eventos_user} -d ${DB_DATABASE:-eventos_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventos_net
+
+  # ── 4. Redis (caché y colas) ─────────────────────────────────
+  cache:
+    image: redis:7-alpine
+    container_name: eventos_cache
+    restart: unless-stopped
+    volumes:
+      - cache_data:/data
+    networks:
+      - eventos_net
+
+# ── Volúmenes nombrados ──────────────────────────────────────
+volumes:
+  db_data:
+    driver: local
+  cache_data:
+    driver: local
+  vendor_data:
+    driver: local
+
+# ── Red interna ──────────────────────────────────────────────
+networks:
+  eventos_net:
+    driver: bridge
